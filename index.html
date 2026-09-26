@@ -450,16 +450,16 @@ dialog::backdrop { background: rgba(23, 12, 28, 0.6); }
   /* ---------- Musterportfolios ---------- */
   var FUNDS = [
     {
-      id: "klassik",
-      name: "UniKnusper Klassik",
-      desc: "Milder Naturjoghurt mit knusprigem Müsli, frischem Granny Smith und einem Hauch Honig. Der Klassiker, mit dem man nichts falsch macht.",
-      items: ["joghurt", "knusper", "apfel", "honig"],
-      amounts: { joghurt: 200, knusper: 40, apfel: 60, honig: 10 },
-      kpi: ["Volatilität", "sehr gering"],
+      id: "bircher",
+      name: "UniBircher Klassik",
+      desc: "Cremiges Bircher-Müsli aus zarten Haferflocken, Milch und Joghurt mit geriebenem Granny Smith und einem Hauch Honig. Ein Schweizer Klassiker.",
+      items: ["haferflocken", "milch", "joghurt", "apfel", "honig"],
+      amounts: { haferflocken: 50, milch: 100, joghurt: 100, apfel: 60, honig: 10 },
+      kpi: ["Historie", "über 100 Jahre"],
       build: [
-        "200 g Naturjoghurt in die Schüssel geben, das sind etwa fünf gehäufte Esslöffel.",
-        "Eine Handvoll Knuspermüsli darüber, ungefähr 40 g, und einen halben Apfel in kleinen Stücken dazu.",
-        "Zum Schluss einen Teelöffel Honig darüberträufeln."
+        "50 g zarte Haferflocken mit 100 ml Milch in der Schüssel verrühren und kurz quellen lassen.",
+        "100 g Naturjoghurt unterrühren, das sind etwa drei gehäufte Esslöffel.",
+        "Einen halben Apfel reiben oder klein schneiden, unterheben und mit einem Teelöffel Honig abschließen."
       ],
       fit: "Sicherheitsorientierte Anleger, die Bewährtes schätzen."
     },
@@ -671,7 +671,7 @@ dialog::backdrop { background: rgba(23, 12, 28, 0.6); }
         "<div>" + mixHtml(mixOf(f.items, f.amounts)) + "</div>" +
         '<div><p class="label">Risikohinweise (Allergene)</p>' + tagsHtml(allergensOf(f.items)) + "</div>" +
         '<div><p class="label">Anlegerprofil</p><p class="fit">' + f.fit + "</p></div>" +
-        '<div><p class="label">So mischst du ihn</p><ol class="build">' + f.build.map(function (b) { return "<li>" + b + "</li>"; }).join("") + "</ol></div>" +
+        '<div><p class="label">So mischst du ihn</p><ol class="build">' + f.build.map(function (b) { return "<li>" + b.replace(/(\d) (g|ml)\b/g, "$1" + NB + "$2") + "</li>"; }).join("") + "</ol></div>" +
       "</div>" +
       '<div class="fund-foot"><button type="button" class="btn ghost" data-template="' + f.id + '">Als Vorlage nehmen</button></div>' +
     "</article>";
