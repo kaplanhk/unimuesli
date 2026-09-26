@@ -376,7 +376,7 @@ dialog::backdrop { background: rgba(23, 12, 28, 0.6); }
         <tbody></tbody>
       </table>
     </div>
-    <p class="fine">* Richtwert. Das Bircher-Müsli ist aus zarten Haferflocken, Milch, Naturjoghurt, Apfel und Honig berechnet.</p>
+    <p class="fine">* Richtwert.</p>
   </section>
 
   <footer class="legal">
@@ -417,13 +417,12 @@ dialog::backdrop { background: rgba(23, 12, 28, 0.6); }
   /* ---------- Zutaten an der Theke ----------
      n = [kcal, Eiweiß, Kohlenhydrate, Zucker, Fett] je 100 g bzw. 100 ml */
   var ING = {
-    bircher:        { label: "Bircher-Müsli",            group: "basis",  all: ["Gluten", "Milch"],                  stem: "Bircher",     n: [129, 5.0, 19.5, 7.1, 2.8], note: "*" },
     joghurt:        { label: "Naturjoghurt mild",        group: "basis",  all: ["Milch"],                            stem: "Joghurt",     n: [79, 4.9, 5.1, 5.1, 3.8] },
     himbeerjoghurt: { label: "Himbeerjoghurt",           group: "basis",  all: ["Milch"],                            stem: "Rosé",        n: [97, 4.4, 12, 12, 3.2] },
     skyr:           { label: "Skyr",                     group: "basis",  all: ["Milch"],                            stem: "Skyr",        n: [99, 9.0, 3.9, 3.9, 5.0] },
     milch:          { label: "Milch 1,5\u00a0%",           group: "liquid", all: ["Milch"],                            stem: "Milch",       n: [47, 3.4, 4.9, 4.9, 1.5],  portion: 100, unit: "ml" },
     mandeldrink:    { label: "Mandeldrink",              group: "liquid", all: ["Nüsse"],                            stem: "Mandel",      n: [14, 0.5, 0, 0, 1.1],      portion: 100, unit: "ml", sub: "ohne Zucker, laktosefrei" },
-    spekulatius:    { label: "Spekulatius-Knuspermüsli", group: "muesli", all: ["Gluten", "Nüsse"],                  stem: "Spekulatius", n: [458, 9.3, 61, 17, 18],    portion: 40 },
+    knusper:        { label: "Knuspermüsli",             group: "muesli", all: ["Gluten", "Nüsse"],                  stem: "Knusper",     n: [458, 9.3, 61, 17, 18],    portion: 40 },
     proteinmuesli:  { label: "Protein-Müsli",            group: "muesli", all: ["Gluten", "Milch", "Nüsse", "Soja"], stem: "Protein",     n: [427, 30, 27, 13, 19],     portion: 40, sub: "Schoko und Nuss" },
     haferflocken:   { label: "Zarte Haferflocken",       group: "muesli", all: ["Gluten"],                           stem: "Hafer",       n: [371, 13.2, 59.5, 0.8, 6.7], portion: 30 },
     cornflakes:     { label: "Schoko-Cornflakes",        group: "muesli", all: ["Gluten", "Milch", "Soja"],          stem: "Schoko",      n: [487, 6.1, 61, 44, 23],    portion: 15 },
@@ -431,6 +430,7 @@ dialog::backdrop { background: rgba(23, 12, 28, 0.6); }
     heidelbeeren:   { label: "Heidelbeeren",             group: "obst",   all: [],                                   stem: "Heidelbeer",  n: [45, 0.7, 9.5, 9.5, 0.3],  portion: 40, note: "*" },
     granatapfel:    { label: "Granatapfelkerne",         group: "obst",   all: [],                                   stem: "Granatapfel", n: [78, 1.5, 16, 14, 1.0],    portion: 25, note: "*" },
     apfel:          { label: "Apfel (Granny Smith)",     group: "obst",   all: [],                                   stem: "Apfel",       n: [52, 0.4, 11, 10, 0.2],    portion: 60, note: "*" },
+    banane:         { label: "Banane",                   group: "obst",   all: [],                                   stem: "Banane",      n: [93, 1.1, 20, 17, 0.2],    portion: 60, note: "*" },
     proteincreme:   { label: "Protein-Creme",            group: "extras", all: ["Nüsse"],                            stem: "Nougat",      n: [509, 20, 35.9, 5.4, 38],  portion: 15, drip: 1, sub: "Schoko-Haselnuss" },
     honig:          { label: "Honig",                    group: "extras", all: [],                                   stem: "Honig",       n: [306, 0, 75, 75, 0],       portion: 10 }
   };
@@ -450,15 +450,15 @@ dialog::backdrop { background: rgba(23, 12, 28, 0.6); }
   /* ---------- Musterportfolios ---------- */
   var FUNDS = [
     {
-      id: "bircher",
-      name: "UniBircher Klassik",
-      desc: "Cremiges Bircher-Müsli aus zarten Haferflocken, Milch und Joghurt mit geriebenem Granny Smith, dazu frischer Apfel und ein Hauch Honig. Ein Schweizer Klassiker.",
-      items: ["bircher", "apfel", "honig"],
-      amounts: { bircher: 250, apfel: 60, honig: 10 },
-      kpi: ["Historie", "über 100 Jahre"],
+      id: "klassik",
+      name: "UniKnusper Klassik",
+      desc: "Milder Naturjoghurt mit knusprigem Müsli, frischem Granny Smith und einem Hauch Honig. Der Klassiker, mit dem man nichts falsch macht.",
+      items: ["joghurt", "knusper", "apfel", "honig"],
+      amounts: { joghurt: 200, knusper: 40, apfel: 60, honig: 10 },
+      kpi: ["Volatilität", "sehr gering"],
       build: [
-        "Etwa 250 g Bircher-Müsli in die Schüssel geben, das sind gut fünf gehäufte Esslöffel.",
-        "Einen halben Apfel in kleine Stücke schneiden und darauf verteilen.",
+        "200 g Naturjoghurt in die Schüssel geben, das sind etwa fünf gehäufte Esslöffel.",
+        "Eine Handvoll Knuspermüsli darüber, ungefähr 40 g, und einen halben Apfel in kleinen Stücken dazu.",
         "Zum Schluss einen Teelöffel Honig darüberträufeln."
       ],
       fit: "Sicherheitsorientierte Anleger, die Bewährtes schätzen."
@@ -480,12 +480,12 @@ dialog::backdrop { background: rgba(23, 12, 28, 0.6); }
     {
       id: "beere",
       name: "UniBeere Prestige",
-      desc: "Im Glas geschichtet: knuspriges Spekulatius-Müsli, rosa Himbeerjoghurt und weißer Naturjoghurt, gekrönt von Beeren, Granatapfelkernen und Schoko-Cornflakes.",
-      items: ["spekulatius", "himbeerjoghurt", "joghurt", "himbeeren", "heidelbeeren", "granatapfel", "cornflakes"],
-      amounts: { spekulatius: 30, himbeerjoghurt: 120, joghurt: 100, himbeeren: 30, heidelbeeren: 30, granatapfel: 20, cornflakes: 10 },
+      desc: "Im Glas geschichtet: knuspriges Müsli, rosa Himbeerjoghurt und weißer Naturjoghurt, gekrönt von Beeren, Granatapfelkernen und Schoko-Cornflakes.",
+      items: ["knusper", "himbeerjoghurt", "joghurt", "himbeeren", "heidelbeeren", "granatapfel", "cornflakes"],
+      amounts: { knusper: 30, himbeerjoghurt: 120, joghurt: 100, himbeeren: 30, heidelbeeren: 30, granatapfel: 20, cornflakes: 10 },
       kpi: ["Fotos pro Glas", "mindestens 3"],
       build: [
-        "Unten ins Glas eine Schicht Spekulatius-Knuspermüsli geben.",
+        "Unten ins Glas eine Schicht Knuspermüsli geben.",
         "Himbeerjoghurt und Naturjoghurt nacheinander einschichten, so entstehen rosa und weiße Streifen.",
         "Oben Himbeeren, Heidelbeeren, Granatapfelkerne und ein paar Schoko-Cornflakes verteilen."
       ],
@@ -594,7 +594,7 @@ dialog::backdrop { background: rgba(23, 12, 28, 0.6); }
     if (!items.length) return "";
     var t = templateFor(items);
     if (t) return t.name;
-    var stem = items.indexOf("spekulatius") !== -1 ? "Spekulatius" : null;
+    var stem = null;
     for (var g = 0; g < STEM_ORDER.length && !stem; g++) {
       for (var j = 0; j < items.length; j++) {
         if (ING[items[j]].group === STEM_ORDER[g]) { stem = ING[items[j]].stem; break; }
