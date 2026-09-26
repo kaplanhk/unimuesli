@@ -211,6 +211,55 @@ legend small { font-weight: 400; font-size: 0.85rem; color: var(--muted); font-v
 .mine h3 { font-size: 1.6rem; }
 .mine .label.kicker { margin-bottom: 2px; }
 .empty { margin: 0.5rem 0 0; color: var(--muted); }
+.notice { margin: 0 0 14px; padding: 10px 14px; border-radius: var(--r-md); background: var(--surface); border-left: 4px solid var(--honey); font-size: 0.95rem; }
+
+/* Eigenes Factsheet: Name, Mengen, Teilen */
+.name-field { position: relative; display: grid; }
+.name-field::after { content: attr(data-value) " "; white-space: pre-wrap; overflow-wrap: anywhere; visibility: hidden; }
+.name-input, .name-field::after {
+  grid-area: 1 / 1 / 2 / 2;
+  min-height: 46px; margin: 0; padding: 4px 34px 6px 0;
+  font: inherit; font-size: 1.6rem; font-weight: 850; line-height: 1.15;
+  font-variation-settings: "CASL" 1;
+  border-bottom: 2px dashed transparent;
+}
+.name-input {
+  display: block; width: 100%; resize: none; overflow: hidden;
+  border: 0; border-bottom: 2px dashed var(--line); border-radius: 0;
+  background: transparent; color: var(--primary); overflow-wrap: anywhere;
+}
+.name-input::placeholder { color: var(--primary); opacity: 1; }
+.name-input:focus { outline: none; border-bottom-color: var(--honey); }
+.name-field svg { position: absolute; right: 4px; top: 50%; width: 20px; height: 20px; margin-top: -12px; color: var(--muted); pointer-events: none; }
+.name-hint { margin: 6px 0 1.25rem; font-size: 0.85rem; color: var(--muted); }
+.qty-hint { margin: -2px 0 6px; font-size: 0.85rem; color: var(--muted); }
+.qty-list { list-style: none; margin: 0; padding: 0; }
+.qty-list li { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; padding: 8px 0; border-bottom: 1px solid var(--line); }
+.qty-list li:last-child { border-bottom: 0; }
+.qty-name { flex: 1 1 7em; min-width: 0; line-height: 1.3; -webkit-hyphens: auto; hyphens: auto; }
+.qty-name small { display: block; margin-top: 1px; font-size: 0.78rem; color: var(--muted); }
+.qty-name small:empty { display: none; }
+.stepper { display: flex; align-items: center; flex: none; margin-left: auto; border: 1.5px solid var(--line); border-radius: var(--r-md); background: var(--bg); }
+.step-btn {
+  appearance: none; -webkit-appearance: none; display: grid; place-items: center;
+  width: 40px; height: 44px; padding: 0; border: 0; border-radius: var(--r-md);
+  background: none; color: var(--primary); cursor: pointer; touch-action: manipulation;
+}
+.step-btn svg { width: 16px; height: 16px; }
+.qty-input {
+  width: 3.4em; height: 44px; margin: 0; padding: 0 2px; border: 0; border-radius: 0;
+  background: none; color: var(--ink);
+  font: inherit; font-size: 1rem; font-weight: 650; text-align: right; font-variant-numeric: tabular-nums;
+}
+.qty-input:focus { outline: none; }
+.stepper:focus-within { border-color: var(--honey); box-shadow: 0 0 0 2px var(--honey); }
+.qty-unit { min-width: 1.5em; padding-left: 3px; font-size: 0.9rem; color: var(--muted); }
+.step-btn:focus-visible { outline: 3px solid var(--honey); outline-offset: -3px; }
+#qty-reset { margin-top: 4px; text-align: left; }
+.share-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.share-row .btn { width: 100%; padding: 10px 12px; font-size: 0.95rem; }
+a.btn { text-decoration: none; }
+.dlg-share { margin: 0 0 18px; }
 
 /* Anlageuniversum */
 .table-wrap { background: var(--surface); border-radius: var(--r-lg); padding: 6px 14px 10px; }
@@ -306,6 +355,7 @@ dialog::backdrop { background: rgba(23, 12, 28, 0.6); }
   <section id="konfig" aria-labelledby="h-konfig">
     <h2 id="h-konfig">Dein eigenes Portfolio</h2>
     <p class="lede">Breit streuen, Risiko senken. Tipp an, was in deiner Schüssel landet, und sieh live Risikoklasse, Aufteilung und Nährwerte. Jede Position erhöht das Kleckerrisiko, die Protein-Creme zählt doppelt.</p>
+    <p class="notice" id="notice" role="status" hidden></p>
     <div class="picker" id="picker"></div>
     <div class="ticker">
       <div aria-live="polite">
@@ -314,7 +364,7 @@ dialog::backdrop { background: rgba(23, 12, 28, 0.6); }
       </div>
       <button type="button" class="btn" id="launch" disabled>Auflegen</button>
     </div>
-    <article class="fund mine" id="mine" aria-labelledby="m-name"></article>
+    <article class="fund mine" id="mine" aria-label="Dein Factsheet"></article>
   </section>
 
   <section aria-labelledby="h-uni">
@@ -349,6 +399,10 @@ dialog::backdrop { background: rgba(23, 12, 28, 0.6); }
       <div><dt>Fondsnummer</dt><dd id="d-nr"></dd></div>
     </dl>
     <p class="hint">Mach ein Foto, bevor der erste Löffel fällt, und zeig den anderen deinen Fonds.</p>
+    <div class="dlg-share">
+      <p class="label">Fonds teilen</p>
+      <div id="d-share"></div>
+    </div>
     <div class="dlg-actions">
       <button type="button" class="btn" id="d-close">Fertig</button>
       <button type="button" class="link-btn" id="d-reset">Neues Portfolio starten</button>
@@ -441,21 +495,62 @@ dialog::backdrop { background: rgba(23, 12, 28, 0.6); }
 
   var CHECK = '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4.5 10.5l3.5 3.5 7.5-8" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 
-  /* ---------- Auswahl (nur als Komfort auf diesem Gerät gespeichert) ---------- */
-  var KEY = "unimuesli-portfolio";
-  var sel = [];
+  /* ---------- Auswahl, Mengen und Name (nur als Komfort auf diesem Gerät gespeichert) ---------- */
+  var KEY = "unimuesli-portfolio", KEY_AMT = "unimuesli-mengen", KEY_NAME = "unimuesli-name";
+  var NAME_MAX = 40, AMT_MAX = 2000;
+  var sel = [], amt = {}, customName = "";
+  function has(o, k) { return Object.prototype.hasOwnProperty.call(o, k); }
+  function cleanAmt(v) {
+    v = Number(v);
+    if (!isFinite(v)) return null;
+    return Math.max(0, Math.min(AMT_MAX, Math.round(v * 10) / 10));
+  }
+  function cleanName(s) { return typeof s === "string" ? s.replace(/\s+/g, " ").slice(0, NAME_MAX) : ""; }
   try {
     var raw = window.localStorage.getItem(KEY);
     var parsed = raw ? JSON.parse(raw) : null;
     if (Array.isArray(parsed)) {
       parsed.forEach(function (id) {
-        if (typeof id === "string" && Object.prototype.hasOwnProperty.call(ING, id) && sel.indexOf(id) === -1) sel.push(id);
+        if (typeof id === "string" && has(ING, id) && sel.indexOf(id) === -1) sel.push(id);
       });
     }
   } catch (e) { sel = []; }
+  try {
+    var rawAmt = JSON.parse(window.localStorage.getItem(KEY_AMT) || "null");
+    if (rawAmt && typeof rawAmt === "object") {
+      sel.forEach(function (id) {
+        if (has(rawAmt, id)) { var v = cleanAmt(rawAmt[id]); if (v !== null) amt[id] = v; }
+      });
+    }
+  } catch (e) { amt = {}; }
+  try { customName = cleanName(window.localStorage.getItem(KEY_NAME) || ""); } catch (e) { customName = ""; }
+
+  /* Geteilter Link: #fonds=skyr:200,honig:10&name=... öffnet dieses Portfolio */
+  var imported = false;
+  (function () {
+    var hash = (window.location.hash || "").replace(/^#/, "");
+    if (hash.indexOf("fonds=") === -1) return;
+    var params;
+    try { params = new URLSearchParams(hash); } catch (e) { return; }
+    var list = params.get("fonds") || "", nsel = [], namt = {};
+    list.split(",").forEach(function (part) {
+      var bits = part.split(":"), id = bits[0];
+      if (!has(ING, id) || nsel.indexOf(id) !== -1) return;
+      nsel.push(id);
+      if (bits.length > 1 && bits[1] !== "") { var v = cleanAmt(parseFloat(bits[1])); if (v !== null) namt[id] = v; }
+    });
+    if (!nsel.length) return;
+    sel = nsel; amt = namt; customName = cleanName(params.get("name") || "").trim();
+    imported = true;
+    try { window.history.replaceState(null, "", window.location.pathname + window.location.search); } catch (e) {}
+  })();
+
   function persist() {
     try { window.localStorage.setItem(KEY, JSON.stringify(sel)); } catch (e) { /* ohne Speicher geht es auch */ }
+    try { window.localStorage.setItem(KEY_AMT, JSON.stringify(amt)); } catch (e) {}
+    try { window.localStorage.setItem(KEY_NAME, customName); } catch (e) {}
   }
+  if (imported) persist();
 
   /* ---------- Berechnungen ---------- */
   function sameSet(a, b) {
@@ -465,13 +560,17 @@ dialog::backdrop { background: rgba(23, 12, 28, 0.6); }
     for (var i = 0; i < FUNDS.length; i++) if (sameSet(items, FUNDS[i].items)) return FUNDS[i];
     return null;
   }
-  function amountsFor(items) {
-    var t = templateFor(items);
-    if (t) return t.amounts;
+  function defaultAmounts(items) {
+    var t = templateFor(items), out = {};
+    if (t) { items.forEach(function (id) { out[id] = t.amounts[id]; }); return out; }
     var bases = items.filter(function (id) { return ING[id].group === "basis"; });
     var share = bases.length ? Math.round(BASE_TOTAL / bases.length) : 0;
-    var out = {};
     items.forEach(function (id) { out[id] = ING[id].group === "basis" ? share : ING[id].portion; });
+    return out;
+  }
+  function amountsFor(items) {
+    var d = defaultAmounts(items), out = {};
+    items.forEach(function (id) { out[id] = has(amt, id) ? amt[id] : d[id]; });
     return out;
   }
   function nutrition(items, amounts) {
@@ -491,7 +590,7 @@ dialog::backdrop { background: rgba(23, 12, 28, 0.6); }
     items.forEach(function (id) { ING[id].all.forEach(function (a) { set[a] = true; }); });
     return ALLERGEN_ORDER.filter(function (a) { return set[a]; });
   }
-  function nameOf(items) {
+  function autoNameOf(items) {
     if (!items.length) return "";
     var t = templateFor(items);
     if (t) return t.name;
@@ -503,6 +602,9 @@ dialog::backdrop { background: rgba(23, 12, 28, 0.6); }
     }
     return "Uni" + stem + " " + SUFFIX[riskOf(items) - 1];
   }
+  function nameOf(items) {
+    return customName.trim() || autoNameOf(items);
+  }
   function profileOf(risk) {
     if (risk <= 2) return "Sicherheitsorientiert: Bewährtes, wenig Schwankung.";
     if (risk === 3) return "Ausgewogen: von allem ein bisschen, nichts übertrieben.";
@@ -512,6 +614,7 @@ dialog::backdrop { background: rgba(23, 12, 28, 0.6); }
   function mixOf(items, amounts) {
     var per = {}, total = 0;
     items.forEach(function (id) { per[ING[id].group] = (per[ING[id].group] || 0) + amounts[id]; total += amounts[id]; });
+    if (!(total > 0)) return [];
     var used = GROUPS.filter(function (g) { return per[g.id]; });
     var out = [], acc = 0;
     used.forEach(function (g, k) {
@@ -533,6 +636,7 @@ dialog::backdrop { background: rgba(23, 12, 28, 0.6); }
       '<div class="sri-ends"><span>Weniger Kleckerrisiko</span><span>Mehr Kleckerrisiko</span></div>';
   }
   function mixHtml(mix) {
+    if (!mix.length) return '<p class="label">Portfolio-Aufteilung nach Gewicht</p><p class="plain">Noch keine Mengen eingetragen.</p>';
     return '<p class="label">Portfolio-Aufteilung nach Gewicht</p>' +
       '<div class="bar" aria-hidden="true">' + mix.map(function (m) {
         return '<i style="width:' + m[1] + "%;background:var(--k-" + m[2] + ')"></i>';
@@ -600,7 +704,103 @@ dialog::backdrop { background: rgba(23, 12, 28, 0.6); }
   var tMeta = document.getElementById("t-meta");
   var launch = document.getElementById("launch");
   var mine = document.getElementById("mine");
+  var PENCIL = '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M13.5 3.5l3 3L7 16H4v-3l9.5-9.5z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>';
+  var MINUS = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8h10" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>';
+  var PLUS = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8h10M8 3v10" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>';
+  var canNativeShare = typeof navigator.share === "function";
 
+  function unitOf(id) { return ING[id].unit || "g"; }
+  function fmtAmt(v) { return v.toLocaleString("de-DE", { maximumFractionDigits: 1, useGrouping: false }); }
+  function stepOf(id) { return ING[id].unit === "ml" ? 10 : 5; }
+
+  /* ---------- Teilen ---------- */
+  function shareData() {
+    var amounts = amountsFor(sel), nu = nutrition(sel, amounts), risk = riskOf(sel), name = nameOf(sel), all = allergensOf(sel);
+    var own = customName.trim();
+    var link = window.location.href.split("#")[0] + "#fonds=" +
+      sel.map(function (id) { return id + ":" + amounts[id]; }).join(",") +
+      (own ? "&name=" + encodeURIComponent(own) : "");
+    var lines = ["Mein UniMüsli-Fonds: " + name, "", "Positionen:"]
+      .concat(sel.map(function (id) { return "– " + ING[id].label + ": " + fmtAmt(amounts[id]) + " " + unitOf(id); }))
+      .concat([
+        "",
+        "Risikoklasse " + risk + " von 7",
+        "Je Schüssel: " + fmt(nu.kcal) + " kcal, " + fmt(nu.prot) + " g Eiweiß, " + fmt(nu.sugar) + " g Zucker, " + fmt(nu.fat) + " g Fett",
+        "Allergene: " + (all.length ? all.join(", ") : "keine der Hauptallergene"),
+        "Anlegerprofil: " + profileOf(risk),
+        "",
+        "Zum Nachmischen: " + link
+      ]);
+    return { name: name, subject: "Mein UniMüsli-Fonds: " + name, text: lines.join("\n") };
+  }
+  function shareRowHtml() {
+    return '<div class="share-row">' +
+      '<a class="btn ghost" data-share="whatsapp" href="#" target="_blank" rel="noopener">WhatsApp</a>' +
+      '<a class="btn ghost" data-share="mail" href="#">E-Mail</a>' +
+      (canNativeShare ? '<button type="button" class="btn ghost" data-share="native">Andere Apps</button>' : "") +
+      '<button type="button" class="btn ghost" data-share="copy">Text kopieren</button>' +
+    "</div>";
+  }
+  function updateShareLinks() {
+    if (!sel.length) return;
+    var d = shareData();
+    var hrefs = {
+      whatsapp: "https://wa.me/?text=" + encodeURIComponent(d.text),
+      mail: "mailto:?subject=" + encodeURIComponent(d.subject) + "&body=" + encodeURIComponent(d.text.replace(/\n/g, "\r\n"))
+    };
+    var links = document.querySelectorAll("a[data-share]");
+    for (var i = 0; i < links.length; i++) links[i].setAttribute("href", hrefs[links[i].getAttribute("data-share")]);
+  }
+  function flash(btn, msg) {
+    if (!btn.hasAttribute("data-label")) btn.setAttribute("data-label", btn.textContent);
+    btn.textContent = msg;
+    clearTimeout(btn._flash);
+    btn._flash = setTimeout(function () { btn.textContent = btn.getAttribute("data-label"); }, 1800);
+  }
+  function copyText(text, btn) {
+    function fallback() {
+      var ta = document.createElement("textarea"), ok = false;
+      ta.value = text;
+      ta.setAttribute("readonly", "");
+      ta.style.position = "fixed"; ta.style.top = "0"; ta.style.left = "0"; ta.style.opacity = "0";
+      (btn.closest("dialog") || document.body).appendChild(ta);
+      ta.select();
+      try { ok = document.execCommand("copy"); } catch (e) { ok = false; }
+      ta.parentNode.removeChild(ta);
+      flash(btn, ok ? "Kopiert" : "Nicht möglich");
+    }
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(text).then(function () { flash(btn, "Kopiert"); }, fallback);
+    } else {
+      fallback();
+    }
+  }
+  document.addEventListener("click", function (e) {
+    var b = e.target.closest("button[data-share]");
+    if (!b || !sel.length) return;
+    var d = shareData();
+    if (b.getAttribute("data-share") === "native" && canNativeShare) {
+      navigator.share({ title: d.subject, text: d.text }).catch(function () {});
+    } else {
+      copyText(d.text, b);
+    }
+  });
+
+  /* ---------- Dein Factsheet ---------- */
+  function qtyRowHtml(id) {
+    var it = ING[id];
+    var unitWord = it.unit === "ml" ? "Milliliter" : "Gramm";
+    return '<li data-id="' + id + '">' +
+      '<span class="qty-name">' + it.label + '<small class="qty-default"></small></span>' +
+      '<span class="stepper">' +
+        '<button type="button" class="step-btn" data-step="-1" aria-label="Weniger ' + it.label + '">' + MINUS + "</button>" +
+        '<input class="qty-input" type="text" inputmode="decimal" autocomplete="off" enterkeyhint="done" maxlength="6" aria-label="Menge ' + it.label + " in " + unitWord + '">' +
+        '<span class="qty-unit" aria-hidden="true">' + unitOf(id) + "</span>" +
+        '<button type="button" class="step-btn" data-step="1" aria-label="Mehr ' + it.label + '">' + PLUS + "</button>" +
+      "</span></li>";
+  }
+
+  /* Vollständiges Neuzeichnen, wenn sich die Auswahl ändert */
   function render() {
     var chips = picker.querySelectorAll(".chip");
     for (var i = 0; i < chips.length; i++) {
@@ -610,32 +810,127 @@ dialog::backdrop { background: rgba(23, 12, 28, 0.6); }
       tName.textContent = "Noch leer";
       tMeta.textContent = "Tipp deine erste Position an.";
       launch.disabled = true;
-      mine.innerHTML = '<h3 id="m-name">Dein Factsheet</h3><p class="empty">Noch keine Positionen. Tipp oben an, was in deine Schüssel kommt.</p>';
+      mine.innerHTML = '<h3>Dein Factsheet</h3><p class="empty">Noch keine Positionen. Tipp oben an, was in deine Schüssel kommt.</p>';
       return;
     }
-    var amounts = amountsFor(sel), nu = nutrition(sel, amounts), risk = riskOf(sel), name = nameOf(sel);
-    tName.textContent = name;
-    tMeta.textContent = "Risikoklasse" + NB + risk + ", " + fmt(nu.prot) + NB + "g Eiweiß, " + fmt(nu.kcal) + NB + "kcal";
     launch.disabled = false;
     mine.innerHTML =
       '<p class="label kicker">Dein Factsheet</p>' +
-      '<h3 id="m-name">' + name + "</h3>" +
-      '<p class="desc">' + sel.map(function (id) { return ING[id].label + " (" + amounts[id] + NB + (ING[id].unit || "g") + ")"; }).join(", ") + ".</p>" +
+      '<div class="name-field" id="m-name-field"><textarea id="m-name" class="name-input" rows="1" maxlength="' + NAME_MAX + '" autocomplete="off" autocapitalize="words" spellcheck="false" enterkeyhint="done" aria-label="Fondsname, optional" aria-describedby="m-name-hint"></textarea>' + PENCIL + "</div>" +
+      '<p class="name-hint" id="m-name-hint">Tipp auf den Namen, um ihn zu ändern. Leer lassen für den automatischen Namen.</p>' +
       '<div class="fund-body">' +
+        '<div><p class="label">Positionen und Mengen</p>' +
+          '<p class="qty-hint">Mit der Waage an der Theke abwiegen und hier eintragen.</p>' +
+          '<ul class="qty-list">' + sel.map(qtyRowHtml).join("") + "</ul>" +
+          '<button type="button" class="link-btn" id="qty-reset" hidden>Standardmengen wiederherstellen</button>' +
+        "</div>" +
+        '<div class="fund-body" id="mine-calc"></div>' +
+        '<div><p class="label">Fonds teilen</p>' + shareRowHtml() + "</div>" +
+      "</div>";
+    document.getElementById("m-name").value = customName;
+    update();
+  }
+
+  /* Werte aktualisieren, ohne die Eingabefelder neu zu bauen (Fokus bleibt erhalten) */
+  function update() {
+    if (!sel.length) return;
+    var defaults = defaultAmounts(sel), amounts = amountsFor(sel);
+    var nu = nutrition(sel, amounts), risk = riskOf(sel), name = nameOf(sel);
+    tName.textContent = name;
+    tMeta.textContent = "Risikoklasse" + NB + risk + ", " + fmt(nu.prot) + NB + "g Eiweiß, " + fmt(nu.kcal) + NB + "kcal";
+    var nameInput = document.getElementById("m-name");
+    if (nameInput) {
+      nameInput.placeholder = autoNameOf(sel);
+      if (document.activeElement !== nameInput && nameInput.value !== customName) nameInput.value = customName;
+      document.getElementById("m-name-field").setAttribute("data-value", nameInput.value || nameInput.placeholder);
+    }
+    var changed = false;
+    var rows = mine.querySelectorAll(".qty-list li");
+    for (var i = 0; i < rows.length; i++) {
+      var id = rows[i].getAttribute("data-id");
+      var input = rows[i].querySelector(".qty-input");
+      if (document.activeElement !== input) input.value = fmtAmt(amounts[id]);
+      var differs = amounts[id] !== defaults[id];
+      if (differs) changed = true;
+      rows[i].querySelector(".qty-default").textContent = differs ? "Standard: " + fmtAmt(defaults[id]) + NB + unitOf(id) : "";
+    }
+    var reset = document.getElementById("qty-reset");
+    if (reset) reset.hidden = !changed;
+    var calc = document.getElementById("mine-calc");
+    if (calc) {
+      calc.innerHTML =
         "<div>" + sriHtml(risk) + "</div>" +
         "<div>" + statsHtml(nu) + "</div>" +
         "<div>" + mixHtml(mixOf(sel, amounts)) + "</div>" +
         '<div><p class="label">Risikohinweise (Allergene)</p>' + tagsHtml(allergensOf(sel)) + "</div>" +
-        '<div><p class="label">Anlegerprofil</p><p class="fit">' + profileOf(risk) + "</p></div>" +
-      "</div>";
+        '<div><p class="label">Anlegerprofil</p><p class="fit">' + profileOf(risk) + "</p></div>";
+    }
+    updateShareLinks();
   }
+
+  function readAmt(input) {
+    var txt = input.value.replace(",", ".").trim();
+    if (txt === "" || !/^\d*\.?\d*$/.test(txt) || txt === ".") return null;
+    return cleanAmt(parseFloat(txt));
+  }
+  mine.addEventListener("input", function (e) {
+    var t = e.target;
+    if (t.id === "m-name") {
+      if (/[\r\n]/.test(t.value)) t.value = t.value.replace(/\s*[\r\n]+\s*/g, " ");
+      customName = cleanName(t.value);
+      persist();
+      update();
+    } else if (t.classList.contains("qty-input")) {
+      var v = readAmt(t);
+      if (v === null) return;
+      amt[t.closest("li").getAttribute("data-id")] = v;
+      persist();
+      update();
+    }
+  });
+  mine.addEventListener("change", function (e) {
+    var t = e.target;
+    if (t.id === "m-name") {
+      customName = cleanName(t.value).trim();
+      t.value = customName;
+      persist();
+      update();
+    } else if (t.classList.contains("qty-input")) {
+      var id = t.closest("li").getAttribute("data-id");
+      var v = readAmt(t);
+      if (v === null) delete amt[id]; else amt[id] = v;
+      persist();
+      update();
+      t.value = fmtAmt(amountsFor(sel)[id]);
+    }
+  });
+  mine.addEventListener("keydown", function (e) {
+    if (e.key === "Enter" && (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA")) { e.preventDefault(); e.target.blur(); }
+  });
+  mine.addEventListener("click", function (e) {
+    var b = e.target.closest(".step-btn");
+    if (b) {
+      var id = b.closest("li").getAttribute("data-id");
+      var step = stepOf(id), cur = amountsFor(sel)[id];
+      var next = b.getAttribute("data-step") === "1" ? Math.floor(cur / step) * step + step : Math.ceil(cur / step) * step - step;
+      amt[id] = cleanAmt(next);
+      persist();
+      update();
+      return;
+    }
+    if (e.target.closest("#qty-reset")) {
+      amt = {};
+      persist();
+      update();
+    }
+  });
 
   picker.addEventListener("click", function (e) {
     var chip = e.target.closest(".chip");
     if (!chip) return;
     var id = chip.getAttribute("data-ing");
     var at = sel.indexOf(id);
-    if (at === -1) sel.push(id); else sel.splice(at, 1);
+    if (at === -1) sel.push(id); else { sel.splice(at, 1); delete amt[id]; }
     persist();
     render();
   });
@@ -650,6 +945,8 @@ dialog::backdrop { background: rgba(23, 12, 28, 0.6); }
     var f = FUNDS.filter(function (x) { return x.id === btn.getAttribute("data-template"); })[0];
     if (!f) return;
     sel = f.items.slice();
+    amt = {};
+    customName = "";
     persist();
     render();
     toKonfig();
@@ -668,11 +965,15 @@ dialog::backdrop { background: rgba(23, 12, 28, 0.6); }
     document.getElementById("d-prot").textContent = fmt(nu.prot) + NB + "g";
     document.getElementById("d-time").textContent = new Date().toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" }) + NB + "Uhr";
     document.getElementById("d-nr").textContent = "UM-" + ("000" + Math.floor(Math.random() * 10000)).slice(-4);
+    document.getElementById("d-share").innerHTML = shareRowHtml();
+    updateShareLinks();
     if (typeof dlg.showModal === "function") dlg.showModal(); else dlg.setAttribute("open", "");
   });
   document.getElementById("d-close").addEventListener("click", closeDialog);
   document.getElementById("d-reset").addEventListener("click", function () {
     sel = [];
+    amt = {};
+    customName = "";
     persist();
     render();
     closeDialog();
@@ -681,6 +982,12 @@ dialog::backdrop { background: rgba(23, 12, 28, 0.6); }
   dlg.addEventListener("click", function (e) { if (e.target === dlg) closeDialog(); });
 
   render();
+  if (imported) {
+    var notice = document.getElementById("notice");
+    notice.textContent = "Geteiltes Portfolio geladen. Du kannst es hier anpassen.";
+    notice.hidden = false;
+    setTimeout(function () { document.getElementById("konfig").scrollIntoView({ block: "start" }); }, 0);
+  }
 
   /* ---------- Wertentwicklung ---------- */
   var NS = "http://www.w3.org/2000/svg";
